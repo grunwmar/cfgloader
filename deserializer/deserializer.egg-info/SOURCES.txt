@@ -1,0 +1,5 @@
+setup.py
+deserializer.egg-info/PKG-INFO
+deserializer.egg-info/SOURCES.txt
+deserializer.egg-info/dependency_links.txt
+deserializer.egg-info/top_level.txt
