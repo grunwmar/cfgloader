@@ -78,15 +78,15 @@ class ConfigDict(dict):
         return cls(content)
 
     @classmethod
-    def http_load(cls, url: str, sformat: str, default_content=None, args: dict = None):
+    def from_http(cls, url: str, sformat: str, default_content=None, args: dict = None):
         return cls.load(http_url=url, http_args=args, sformat=sformat, default_content=default_content)
 
     @classmethod
-    def string_load(cls, string, sformat, default_content=None):
+    def from_string(cls, string, sformat, default_content=None):
         return cls.load(string=string, sformat=sformat, default_content=default_content)
 
     @classmethod
-    def file_load(cls, file, default_content=None):
+    def from_file(cls, file, default_content=None):
         return cls.load(file=file, default_content=default_content)
 
     def __init__(self, dict_):
