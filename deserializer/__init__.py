@@ -3,6 +3,7 @@ import os
 import json
 import toml
 import yaml
+import configparser
 import requests
 
 from ._dotdict import DotDict
@@ -29,7 +30,7 @@ def _all_none(*args):
     return not any(args)
 
 
-class ConfigDict(dict):
+class DeserializerDict(dict):
     """ Class designed to quick and easy access to configuration files. """
 
     @classmethod
@@ -45,10 +46,17 @@ class ConfigDict(dict):
                     return module.loads_custom(obj)
             return inner
 
+        def load_ini(obj):
+            config = configparser.ConfigParser()
+            if isinstance(obj, _io.TextIOWrapper):
+                config.read_string(obj.read())
+                return config
+
         method = {
                 ".json": load_(json),
                 ".yaml": load_(yaml),
                 ".toml": load_(toml),
+                ".ini": load_ini
             }
 
         if _all_none(http_url, string, sformat) and isinstance(file, str):
@@ -82,7 +90,7 @@ class ConfigDict(dict):
         return cls.load(http_url=url, http_args=args, sformat=sformat, default_content=default_content)
 
     @classmethod
-    def from_string(cls, string, sformat, default_content=None):
+    def from_string(cls, string: str, sformat: str, default_content=None):
         return cls.load(string=string, sformat=sformat, default_content=default_content)
 
     @classmethod
@@ -92,26 +100,10 @@ class ConfigDict(dict):
     def __init__(self, dict_):
         super().__init__(dict_)
 
-    def get(self, path=None):
-        """ Method to get access to certain value by in a way similar to that in xpath. """
-
-        if path is None:
-            return DotDict(self)
-
-        else:
-            split_path = path.split("/")
-            result = self[*split_path]
-
-            if isinstance(result, dict):
-                return DotDict(result)
-
-            else:
-                return result
-
     def __getitem__(self, items):
         """ Override original __getitem__ method to be able to accept more arguments """
 
-        result = dict(self)
+        result = DotDict(self)
         for i in items:
             if isinstance(result, list) or isinstance(result, tuple):
                 key = int(i)
@@ -122,6 +114,9 @@ class ConfigDict(dict):
             result = result[key]
         return result
 
+    def attrs(self):
+        return DotDict(self)
+
     def __str__(self):
-        json_formatted = json.dumps(self, ensure_ascii=TO_STRING_ENSURE_ASCII, indent=TO_STRING_INDENT)
+        json_formatted = json.dumps(DotDict(self), ensure_ascii=TO_STRING_ENSURE_ASCII, indent=TO_STRING_INDENT)
         return f"{self.__class__.__name__}({json_formatted})"

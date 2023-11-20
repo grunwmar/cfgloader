@@ -1,23 +1,18 @@
-from cfgload import ConfigDict
-import cfgload
+from deserializer import DeserializerDict
+import deserializer
 
-cfgload.TO_STRING_INDENT = None
+deserializer.TO_STRING_INDENT = 2
 
 
-FILE_LST = ["test_files/test.json", "test_files/test.yaml", "test_files/test.toml"]
+FILE_LST = ["test_files/test.json", "test_files/test.yaml", "test_files/test.toml", "test_files/test.ini"]
 
 for fn in FILE_LST:
-    config = ConfigDict.from_file(fn)
-    print(fn, "-->", config)
+    config = DeserializerDict.from_file(fn)
+    print(fn, "-->", config.attrs().users)
 
 print("\n")
 
-for fn in FILE_LST:
-    with open(fn, "r") as fp:
-        config = ConfigDict.from_file(fp)
-        print(fn, "-->", config)
 
-print("\n")
 
 STRINGS = {
     "json": """{"users": {"name": ["Eric", "Cook"]}}""",
@@ -31,17 +26,17 @@ name = ["Eric", "Cook"]
 """
 }
 
-for sft, st in STRINGS.items():
-    config = ConfigDict.from_string(string=st, sformat=sft)
-    print("<--- --- ---", sft, "--- --- --->")
+for string_format, string in STRINGS.items():
+    config = DeserializerDict.from_string(string, string_format)
+    print("<--- --- ---", string_format, "--- --- --->")
     print("\n...")
-    print(st)
+    print(string)
     print("...\n")
     print(config, "\n")
 
 # GIT HUB api test
 
-config = ConfigDict.from_http("https://api.github.com/", sformat=cfgload.FORMAT_JSON)
+config = DeserializerDict.from_http("https://api.github.com/", deserializer.FORMAT_JSON)
 print("GitHub", config)
 
 
