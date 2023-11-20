@@ -7,14 +7,14 @@ cfgload.TO_STRING_INDENT = None
 FILE_LST = ["test_files/test.json", "test_files/test.yaml", "test_files/test.toml"]
 
 for fn in FILE_LST:
-    config = ConfigDict.file_load(fn)
+    config = ConfigDict.from_file(fn)
     print(fn, "-->", config)
 
 print("\n")
 
 for fn in FILE_LST:
     with open(fn, "r") as fp:
-        config = ConfigDict.file_load(fp)
+        config = ConfigDict.from_file(fp)
         print(fn, "-->", config)
 
 print("\n")
@@ -32,7 +32,7 @@ name = ["Eric", "Cook"]
 }
 
 for sft, st in STRINGS.items():
-    config = ConfigDict.string_load(string=st, sformat=sft)
+    config = ConfigDict.from_string(string=st, sformat=sft)
     print("<--- --- ---", sft, "--- --- --->")
     print("\n...")
     print(st)
@@ -41,7 +41,7 @@ for sft, st in STRINGS.items():
 
 # GIT HUB api test
 
-config = ConfigDict.http_load("https://api.github.com/", sformat=cfgload.FORMAT_JSON)
+config = ConfigDict.from_http("https://api.github.com/", sformat=cfgload.FORMAT_JSON)
 print("GitHub", config)
 
 
