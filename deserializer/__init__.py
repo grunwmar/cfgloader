@@ -6,7 +6,7 @@ import yaml
 import configparser
 import requests
 
-from ._dotdict import DotDict
+from ._dotdict import _DotDict
 
 yaml.load_custom = yaml.safe_load
 yaml.loads_custom = yaml.safe_load
@@ -30,6 +30,15 @@ def _all_none(*args):
     return not any(args)
 
 
+def _to_dict_iter(dct):
+    new_dict = dict()
+    for key, value in dct.items():
+        if hasattr(value, 'keys'):
+            value = dict(value)
+        new_dict[key] = value
+    return new_dict
+
+
 class DeserializerDict(dict):
     """ Class designed to quick and easy access to configuration files. """
 
@@ -50,7 +59,8 @@ class DeserializerDict(dict):
             config = configparser.ConfigParser()
             if isinstance(obj, _io.TextIOWrapper):
                 config.read_string(obj.read())
-                return config
+                new_dict = _to_dict_iter(config)
+                return new_dict
 
         method = {
                 ".json": load_(json),
@@ -103,7 +113,7 @@ class DeserializerDict(dict):
     def __getitem__(self, items):
         """ Override original __getitem__ method to be able to accept more arguments """
 
-        result = DotDict(self)
+        result = dict(self)
         for i in items:
             if isinstance(result, list) or isinstance(result, tuple):
                 key = int(i)
@@ -114,9 +124,12 @@ class DeserializerDict(dict):
             result = result[key]
         return result
 
-    def attrs(self):
-        return DotDict(self)
+    def __call__(self, dot_dict=True):
+        if dot_dict:
+            return _DotDict(self)
+        else:
+            return _to_dict_iter(self)
 
     def __str__(self):
-        json_formatted = json.dumps(DotDict(self), ensure_ascii=TO_STRING_ENSURE_ASCII, indent=TO_STRING_INDENT)
+        json_formatted = json.dumps(_DotDict(self), ensure_ascii=TO_STRING_ENSURE_ASCII, indent=TO_STRING_INDENT)
         return f"{self.__class__.__name__}({json_formatted})"
